@@ -1,0 +1,10 @@
+.sidebar {
+  flex: 4;
+  background-color: #dcdcdc;
+  padding: 0.5rem;
+  overflow-y: auto;
+}
+
+ul {
+    padding-left: 18px;
+}
