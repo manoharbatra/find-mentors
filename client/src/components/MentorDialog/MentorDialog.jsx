@@ -12,6 +12,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import axios from "axios";
 import { placeholders } from "./placholderValues";
 
 const initialForm = {
@@ -52,23 +53,38 @@ const MentorDialog = ({ open, handleClose }) => {
     setForm({ ...form, [field]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    setOpenSnackbar(true); // show snackbar
-    handleClose();
-    setForm(initialForm);
+  // const handleSubmit = () => {
+  //   setOpenSnackbar(true); // show snackbar
+  //   handleClose();
+  //   setForm(initialForm);
+  // };
+  const handleSubmit = async () => {
+    try {
+      const processedForm = {
+        ...form,
+        skills: form.skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        companies: form.companies
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean),
+        industry: form.industry
+          .split(",")
+          .map((i) => i.trim())
+          .filter(Boolean),
+      };
+
+      await axios.post("/api/mentors", processedForm);
+      setOpenSnackbar(true);
+      handleClose();
+      setForm(initialForm);
+    } catch (error) {
+      console.error("Submission failed:", error);
+      alert("Submission failed. Please try again.");
+    }
   };
-  // once api is integarated, this function will be used to submit the form data
-//   const handleSubmit = async () => {
-//   try {
-//     await axios.post('http://localhost:5000/api/mentors', form);
-//     setOpenSnackbar(true); // show snackbar
-//     handleClose();
-//     setForm(initialForm);
-//   } catch (error) {
-//     console.error('Submission failed:', error);
-//     alert('Submission failed. Please try again.');
-//   }
-// };
 
   const openTopmate = () => {
     window.open("https://www.topmate.io/join/manohar", "_blank");

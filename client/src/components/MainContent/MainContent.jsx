@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { mockData } from "../../constants/mockData";
+import React, { useMemo, useEffect, useState } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -11,9 +11,27 @@ import {
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 
 const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
-  // Filter profiles based on selected criteria
+  const [mentors, setMentors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMentors = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/mentors");
+        setMentors(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch mentors");
+        setLoading(false);
+      }
+    };
+    fetchMentors();
+  }, []);
+
   const filteredProfiles = useMemo(() => {
-    return mockData.filter((item) => {
+    return mentors.filter((item) => {
       const isActive = item.active === true;
       const matchDomain = !selectedDomain || item.domain === selectedDomain;
       const matchExpertise =
@@ -23,12 +41,15 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
         selectedSkills.some((skill) => item.skills.includes(skill));
       return isActive && matchDomain && matchExpertise && matchSkills;
     });
-  }, [selectedDomain, selectedExpertise, selectedSkills]);
+  }, [mentors, selectedDomain, selectedExpertise, selectedSkills]);
 
   const handleCall = (url) => {
     const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
     window.open(formattedUrl, "_blank", "noopener,noreferrer");
   };
+
+  if (loading) return <Typography>Loading mentors...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <Grid container spacing={2}>
@@ -38,7 +59,7 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
           xs={12}
           sm={6}
           md={4}
-          key={profile.id}
+          key={profile._id || profile.id}
           style={{ display: "flex" }}
         >
           <Card
@@ -58,7 +79,7 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
               <Box display="flex" alignItems="center" gap={2} mb={1}>
                 <LinkedInIcon
                   sx={{ cursor: "pointer", color: "#0077b5" }}
-                  onClick={() => handleCall(profile.linkedInLink)}
+                  onClick={() => handleCall(profile.linkedinLink)}
                 />
                 <Box>
                   <Typography variant="subtitle1">{profile.name}</Typography>
@@ -77,7 +98,7 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
                 <strong>Companies:</strong> {profile.companies.join(", ")}
               </Typography>
               <Typography variant="body2">
-                <strong>Industry:</strong> {profile.Industry.join(", ")}
+                <strong>Industry:</strong> {profile.industry.join(", ")}
               </Typography>
             </CardContent>
             <Button
