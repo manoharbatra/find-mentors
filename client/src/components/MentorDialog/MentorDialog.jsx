@@ -76,7 +76,8 @@ const MentorDialog = ({ open, handleClose }) => {
           .filter(Boolean),
       };
 
-      await axios.post("/api/mentors", processedForm);
+      // await axios.post("/api/mentors", processedForm);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/mentors`, processedForm); 
       setOpenSnackbar(true);
       handleClose();
       setForm(initialForm);

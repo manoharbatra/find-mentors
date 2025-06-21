@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+// import { mockData } from "../../constants/mockData";
 
 const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
   const [mentors, setMentors] = useState([]);
@@ -16,10 +17,12 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log(" import ", import.meta.env.VITE_API_URL);
     const fetchMentors = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/mentors`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/mentors`)
+        // const response = await axios.get("/api/mentors");
         setMentors(response.data);
         setLoading(false);
       } catch (err) {
@@ -31,7 +34,8 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
   }, []);
 
   const filteredProfiles = useMemo(() => {
-    return mentors.filter((item) => {
+    // return mockData.filter((item) => { // mockData
+      return mentors.filter((item) => { // api
       const isActive = item.active === true;
       const matchDomain = !selectedDomain || item.domain === selectedDomain;
       const matchExpertise =
@@ -41,7 +45,9 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
         selectedSkills.some((skill) => item.skills.includes(skill));
       return isActive && matchDomain && matchExpertise && matchSkills;
     });
-  }, [mentors, selectedDomain, selectedExpertise, selectedSkills]);
+  }, [ mentors,
+    // mockData, 
+    selectedDomain, selectedExpertise, selectedSkills]);
 
   const handleCall = (url) => {
     const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
