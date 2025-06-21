@@ -10,10 +10,12 @@ import {
   Checkbox,
   FormGroup,
 } from '@mui/material';
-import { mockData } from '../../constants/mockData';
+// import { mockData } from '../../constants/mockData';
 import './Sidebar.css';
 
 const Sidebar = ({ 
+  loading,
+  mentors,
   selectedDomain, 
   setSelectedDomain, 
   selectedExpertise, 
@@ -21,18 +23,27 @@ const Sidebar = ({
   selectedSkills,
   setSelectedSkills,
 }) => {
-  const uniqueDomains = useMemo(() => [...new Set(mockData.map(item => item.domain))], []);
+  const uniqueDomains = useMemo(() => [...new Set(mentors.map(item => item.domain))], [mentors]);
+  // const uniqueDomains = useMemo(() => [...new Set(mockData.map(item => item.domain))], []);
 
   const filteredExpertises = useMemo(() => {
     return [...new Set(
-      mockData
+      mentors
         .filter(item => item.domain === selectedDomain)
         .map(item => item.expertise)
     )];
   }, [selectedDomain]);
 
+  // const filteredExpertises = useMemo(() => {
+  //   return [...new Set(
+  //     mockData
+  //       .filter(item => item.domain === selectedDomain)
+  //       .map(item => item.expertise)
+  //   )];
+  // }, [selectedDomain]);
+
   const skillOptions = useMemo(() => {
-    const filtered = mockData.filter(
+    const filtered = mentors.filter(
       (item) =>
         item.domain === selectedDomain &&
         (!selectedExpertise || item.expertise === selectedExpertise)
@@ -40,6 +51,16 @@ const Sidebar = ({
     const allSkills = filtered.flatMap((item) => item.skills);
     return [...new Set(allSkills)];
   }, [selectedDomain, selectedExpertise]);
+  
+  // const skillOptions = useMemo(() => {
+  //   const filtered = mockData.filter(
+  //     (item) =>
+  //       item.domain === selectedDomain &&
+  //       (!selectedExpertise || item.expertise === selectedExpertise)
+  //   );
+  //   const allSkills = filtered.flatMap((item) => item.skills);
+  //   return [...new Set(allSkills)];
+  // }, [selectedDomain, selectedExpertise]);
 
 
   const handleSkillToggle = (skill) => {
@@ -55,6 +76,10 @@ const Sidebar = ({
     setSelectedExpertise('');
     setSelectedSkills([]);
   };
+  
+  if (loading) {
+    return <div className="sidebar">Loading Filters...</div>;
+  }
 
   if (!uniqueDomains.length) {
     return <div className="sidebar">No domains/expertise available</div>;

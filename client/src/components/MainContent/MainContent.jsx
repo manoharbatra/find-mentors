@@ -11,50 +11,61 @@ import {
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 // import { mockData } from "../../constants/mockData";
 
-const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
-  const [mentors, setMentors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const MainContent = ({
+  loading,
+  error,
+  mentors,
+  selectedDomain,
+  selectedExpertise,
+  selectedSkills,
+}) => {
+  // const [mentors, setMentors] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
 
-  useEffect(() => {
-    console.log(" import ", import.meta.env.VITE_API_URL);
-    const fetchMentors = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/mentors`)
-        // const response = await axios.get("/api/mentors");
-        setMentors(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch mentors");
-        setLoading(false);
-      }
-    };
-    fetchMentors();
-  }, []);
+  // useEffect(() => {
+  //   console.log(" import ", import.meta.env.VITE_API_URL);
+  //   const fetchMentors = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/mentors`)
+  //       // const response = await axios.get("/api/mentors");
+  //       setMentors(response.data);
+  //       setLoading(false);
+  //     } catch (err) {
+  //       setError("Failed to fetch mentors");
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchMentors();
+  // }, []);
 
   const filteredProfiles = useMemo(() => {
     // return mockData.filter((item) => { // mockData
-      return mentors.filter((item) => { // api
-      const isActive = item.active === true;
+    return mentors.filter((item) => {
+      // Check if the item matches the selected filters
       const matchDomain = !selectedDomain || item.domain === selectedDomain;
       const matchExpertise =
         !selectedExpertise || item.expertise === selectedExpertise;
       const matchSkills =
         selectedSkills.length === 0 ||
         selectedSkills.some((skill) => item.skills.includes(skill));
-      return isActive && matchDomain && matchExpertise && matchSkills;
+      return matchDomain && matchExpertise && matchSkills;
     });
-  }, [ mentors,
-    // mockData, 
-    selectedDomain, selectedExpertise, selectedSkills]);
+  }, [
+    mentors,
+    // mockData,
+    selectedDomain,
+    selectedExpertise,
+    selectedSkills,
+  ]);
 
   const handleCall = (url) => {
     const formattedUrl = url.startsWith("http") ? url : `https://${url}`;
     window.open(formattedUrl, "_blank", "noopener,noreferrer");
   };
 
-  if (loading) return <Typography>Loading mentors...</Typography>;
+  if (loading) return <Typography>Loading Mentors...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (

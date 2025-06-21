@@ -30,10 +30,13 @@ const initialForm = {
 };
 
 const MentorDialog = ({ open, handleClose }) => {
-  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [canSubmit, setCanSubmit] = useState(false);
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    severity: "",
+    message: "",
+  });
   useEffect(() => {
     const allFilled = Object.entries(form).every(([key, val]) => {
       if (typeof val === "string") return val.trim() !== "";
@@ -59,6 +62,7 @@ const MentorDialog = ({ open, handleClose }) => {
   //   setForm(initialForm);
   // };
   const handleSubmit = async () => {
+    setCanSubmit(true); // Re-enable submit button if not successful
     try {
       const processedForm = {
         ...form,
@@ -77,13 +81,37 @@ const MentorDialog = ({ open, handleClose }) => {
       };
 
       // await axios.post("/api/mentors", processedForm);
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/mentors`, processedForm); 
-      setOpenSnackbar(true);
-      handleClose();
-      setForm(initialForm);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/mentors`,
+        processedForm,
+      );
+
+      console.log("Submission:", response);
+      if (response.status === 201 || response.status === 200) {
+        setAlertProps({
+          severity: "success",
+          message: "Details submitted successfully!",
+        });
+        console.log("Submission successful:", response);
+        setOpenSnackbar(true);
+        setCanSubmit(false);
+        setTimeout(() => {
+          handleClose();
+          setForm(initialForm);
+        }, 3000); // Delay to allow snackbar to be seen
+      } else {
+        setAlertProps({
+          severity: "error",
+          message:
+            "Unable to process request at this time. Please try again later.",
+        });
+        throw new Error("Unexpected response status: " + response.status);
+      }
     } catch (error) {
-      console.error("Submission failed:", error);
-      alert("Submission failed. Please try again.");
+      setAlertProps({
+        severity: "error",
+        message: "Details not submitted successfully!",
+      });
     }
   };
 
@@ -91,7 +119,7 @@ const MentorDialog = ({ open, handleClose }) => {
     window.open("https://www.topmate.io/join/manohar", "_blank");
   };
 
-  console.log("Form data:", form);
+  console.log("openSnackbar :", openSnackbar);
   return (
     <Box>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
@@ -168,20 +196,22 @@ const MentorDialog = ({ open, handleClose }) => {
       </Dialog>
 
       {/* Snackbar for success message */}
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={3000}
-        onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          severity="success"
-          variant="filled"
+      {openSnackbar && (
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={3000}
           onClose={() => setOpenSnackbar(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
-          Details submitted successfully!
-        </Alert>
-      </Snackbar>
+          <Alert
+            severity={alertProps.severity}
+            variant="filled"
+            onClose={() => setOpenSnackbar(false)}
+          >
+            {alertProps.message}
+          </Alert>
+        </Snackbar>
+      )}
     </Box>
   );
 };
