@@ -19,7 +19,7 @@ const MainContent = ({ selectedDomain, selectedExpertise, selectedSkills }) => {
     const fetchMentors = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/api/mentors");
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/mentors`);
         setMentors(response.data);
         setLoading(false);
       } catch (err) {
